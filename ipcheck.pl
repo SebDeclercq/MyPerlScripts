@@ -15,9 +15,7 @@ my $link = get("http://checkip.dyndns.org")
 my $currIP = $& if $link =~ /\d+(\.\d+){3}/;
 
 
-if ($oldIP eq $currIP) {
-  next;
-} else {
+unless ($oldIP eq $currIP) {
   my ($email,$password,$smtp) =   # Defining personal information here ;
   my ($title,$message) = ('IP has changed !',"New IP is : $currIP\n");
 
