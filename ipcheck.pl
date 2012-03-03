@@ -3,10 +3,10 @@ use strict;
 use warnings;
 use LWP::Simple;
 use File::Slurp;
-# REQUIRES sendemail to work
-# ( sudo apt-get install sendemail )
+use Email::Send;
+use Email::Simple::Creator;
 
-my ($ipFile,$oldIP) = ("dyndnscheck",0);
+my ($ipFile,$oldIP) = ("ipcheck",0);
 chomp($oldIP = read_file($ipFile)) if -e $ipFile;
 
 
@@ -16,12 +16,36 @@ my $currIP = $& if $link =~ /\d+(\.\d+){3}/;
 
 
 unless ($oldIP eq $currIP) {
-  my ($email,$password,$smtp) =   # Defining personal information here ;
-  my ($title,$message) = ('IP has changed !',"New IP is : $currIP\n");
-
-  !system 'sendemail','-m', $message,'-f', $email,'-t', $email ,
-    '-u', $title ,'-s', $smtp ,'-o', 'tls=yes','-xu', $email, '-xp', $password
-      or die "can't use sendemail...";
-
+  &sendmail;
   write_file($ipFile,$currIP);
+}
+
+
+
+
+
+sub sendmail {
+  my ($from,$password) =   # Inserting personal information HERE
+  my ($to,$title,$message) = ($from,'IP has changed !',"New IP is : $currIP\n"); # Changing $to if needed
+
+  my $mailer = Email::Send->new( {
+        mailer => 'SMTP::TLS',
+        mailer_args => [
+            Host => 'smtp.gmail.com',
+            Port => 587,
+            User => $from,
+            Password => $password,
+        ]
+    } );
+  my $email = Email::Simple->create(
+        header => [
+            From    => $from,
+            To      => $to,
+            Subject => $title,
+        ],
+        body => $message,
+    );
+
+    eval { $mailer->send($email) };
+    die "Error sending email: $@" if $@;
 }
