@@ -58,9 +58,10 @@ sub sendmail {   # Sending email via GMail
         body => $message,
     );
 
-    eval { $mailer->send($email) };
-    die "Error sending email: $@" if $@;
+  $mailer->send($email)
+    or die "Error sending email : $!\n";
 }
+
 sub loginfo {   # Keeping trace of changes and controls
   if ($_[0] eq 'changes') {
     my $newline = "--- ".localtime()." ---\t".$currIP."\n";
