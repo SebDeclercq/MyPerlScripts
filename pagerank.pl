@@ -19,7 +19,7 @@ getresults($type);
 my $j = 1;
 foreach my $uri (@uris) {
   my $pr = WWW::Google::PageRank->new;
-  say "Le page rank de $results[$j] (résultat $j)\nest de : ".
+  say "The PageRank of $results[$j]\n(result n°$j) is :\t".
     $pr->get($uri) if defined($pr->get($uri));
   $j++;
 }
