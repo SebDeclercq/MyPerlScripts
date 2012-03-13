@@ -28,33 +28,17 @@ foreach my $uri (@uris) {
 
 
 sub getresults {
-if ($_[0] eq 'web') {
-  my $search = Google::Search->Web( $kw );
-  for ( my $i = 0 ; $i < 9 ; $i++ ) {
-    while (my $result = $search->result($i)) {
-      push (@uris,$result->uri);
-      push (@results,$result->titleNoFormatting);
-      last;
+  if ($_[0] =~ m/(web|blog|news)/) {
+    my $type = $_[0];
+    my $search = Google::Search->$type( $kw );
+    for ( my $i = 0 ; $i < 9 ; $i++ ) {
+      while (my $result = $search->result($i)) {
+	push (@uris,$result->uri);
+	push (@results,$result->titleNoFormatting);
+	last;
+      }
     }
+  } else {
+    say "Unsupported type of search : choose web, blog or news";
   }
-} elsif ($_[0] eq 'blog') {
-  my $search = Google::Search->Blog( $kw );
-  for ( my $i = 0 ; $i < 9 ; $i++ ) {
-    while (my $result = $search->result($i)) {
-      push (@uris,$result->uri);
-      push (@results,$result->titleNoFormatting);
-      last;
-    }
-  }
-} elsif ($_[0] eq 'news') {
-  my $search = Google::Search->News( $kw );
-  for ( my $i = 0 ; $i < 9 ; $i++ ) {
-    while (my $result = $search->result($i)) {
-      push (@uris,$result->uri);
-      push (@results,$result->titleNoFormatting);
-      last;
-    }
-  }
-} else {
-  say "Unsupported type of search : choose web, blog or news";
 }
