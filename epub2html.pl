@@ -30,7 +30,7 @@ $epub->extract
   or die "Unable to extract $ARGV[0] : $!";
 
 chdir 'OEBPS'
-  or die "Unable to change to OEBPS : $!";
+  or warn "Unable to change to OEBPS : $!";
 
 my $parser = XML::LibXML->new();
 my $doc    = $parser->parse_file( glob('*.opf') );
@@ -39,11 +39,16 @@ my $xpc = XML::LibXML::XPathContext->new($doc);
 $xpc->registerNs( opf => 'http://www.idpf.org/2007/opf' );
 
 my @htmlfiles;
+my @imgfiles;
 
 foreach my $item ( $xpc->findnodes('//opf:item') ) {
   if ( $item->findvalue('@media-type') eq 'application/xhtml+xml' ) {
     push( @htmlfiles, $item->findvalue('@href') );
   }
+  elsif ( $item->findvalue('@media-type') =~ m/image/ ) {
+    push( @imgfiles, $item->findvalue('@href') );
+  }
+
 }
 
 
@@ -65,7 +70,8 @@ write_file( '../../' . $filename . '.html',
 
 for (@htmlfiles) {
   my $file = read_file($_, {binmode => ':utf8'});
-  $file =~ s/.*<body>//si;
+  $file =~ s/.*<body[^>]+>//si;
+  $file =~ s/(<img src=")/$1img\//i;
   $file =~ s/<\/body> *<\/html>//si;
   write_file( '../../' . $filename . '.html',
 	      { binmode => ':utf8', append => 1 }, $file );
@@ -78,6 +84,14 @@ my $footer = q{
 
 write_file( '../../' . $filename . '.html',
 	    { binmode => ':utf8', append => 1 }, $footer );
+
+mkdir '../../img'
+  or warn "Unable to create img directory : $!";
+
+for (@imgfiles) {
+  copy($_,'../../img/'.$_)
+    or warn "Unable to copy $_ : $!";
+}
 
 chdir '../..';
 remove_tree 'epub'
