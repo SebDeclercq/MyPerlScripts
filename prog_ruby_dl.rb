@@ -1,4 +1,5 @@
 #!/usr/bin/ruby1.9.3
+# -*- coding: utf-8 -*-
 
 require 'mechanize' # = LWP::UserAgent
 require 'zip'
@@ -17,7 +18,7 @@ toc_file = File.new( 'index.html', 'w' )   # Create toc file (for calibre)
 header = %{                                # Header for index.html
 <html>
   <head>
-    <title>Programming Ruby : the pragmatic programmer's guide</title>
+    <title>Programming Ruby : the pragmatic programmer\'s guide</title>
   </head>
   <body>
     <h1>Table of Contents</h1>
@@ -98,6 +99,13 @@ Zip::File.open(zip, Zip::File::CREATE) do |zipfile| # Create zip file
   end
 end
 
-# Trying to exec Calibre conversion but ???
+
 Dir.chdir('..')
-exec( "ebook-convert #{dir}.zip #{dir}.azw3 --cover #{dir}/cover.png" )
+# Create AZW3 file with calibre
+### WARNING : requires external tool
+calibre = system( "ebook-convert #{dir}.zip #{dir}.azw3 --cover #{dir}/cover.png" )
+if calibre
+  puts "All went well and #{dir}.azw3 has been created !"
+else
+  puts "An error has occurred..."
+end
