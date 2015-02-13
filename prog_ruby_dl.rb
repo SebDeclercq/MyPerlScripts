@@ -42,6 +42,9 @@ footer = %{           # Print footer to index.html
     </p>
   </body>
 </html>}
+toc_file.puts(footer)
+toc_file.close
+
 
 # Download cover
 cover = agent.get("https://imagery.pragprog.com/products/49/ruby.jpg")
