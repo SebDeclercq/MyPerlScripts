@@ -16,6 +16,9 @@ toc_file = File.new( 'index.html', 'w' )   # Create toc file (for calibre)
 
 header = %{                                # Header for index.html
 <html>
+  <head>
+    <title>Programming Ruby : the pragmatic programmer's guide</title>
+  </head>
   <body>
     <h1>Table of Contents</h1>
     <p style="text-indent:0pt">
@@ -30,8 +33,30 @@ page.search('a').each do |a|                               # For each link
   filename = i.to_s.rjust(2,'0') + '_' + title + '.html'   # filename = 00_title.html
   output = File.new( filename, 'w' )                       # open/create file
   content = agent.get base_url + a["href"]                 # get content of the linked page
-  output.puts(content.body)                                # print it in output file
-  output.close                                             # close output file
+
+  beginline = ''
+  endline   = ''
+
+  # Remove head content and foot content from pages (ugly)
+  lines = content.body.split("\n")
+  lines.each do |line|
+    beginline = lines.index(line) + 1 if line == '-->'
+    endline   = lines.index(line) - 1 if line =~ /table bgcolor="#a03030"/
+  end
+
+  # If lines found : remove them and create simpler HTML
+  if defined? beginline && defined? endline
+    out = lines[beginline.to_i..endline.to_i]
+    out.unshift("<html>\n","  <head></head>\n","  <body>\n")
+    out.push("  </body>\n","</html>")
+  else
+    out = lines
+  end
+
+  out.each do |l|
+    output.puts l        # Print webpage content to output
+  end
+  output.close           # close output file
 
   # Add link to file in index.html
   toc_line = "      <a href='" + filename + "'>" + a.text + "</a><br/>"
@@ -74,5 +99,5 @@ Zip::File.open(zip, Zip::File::CREATE) do |zipfile| # Create zip file
 end
 
 # Trying to exec Calibre conversion but ???
-# Dir.chdir('..')
-# exec( "ebook-convert #{dir}.zip #{dir}.azw3 --cover #{dir}/cover.png" )
+Dir.chdir('..')
+exec( "ebook-convert #{dir}.zip #{dir}.azw3 --cover #{dir}/cover.png" )
