@@ -1,8 +1,0 @@
-=pod
-
-=head1 Description of scriptsOfMine
-
-This is my own repository where I'll store my scripts (mostly those
-will be only based on testing modules etc. If you have any comments
-about them, please tell ; this rep is a way for me to learn ;-)
-
